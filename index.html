@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tender Costing Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f4f6f5; --surface:#fff; --surface-2:#eef2f0; --ink:#17221e; --ink-2:#4a5852;
+  --line:#d5ddd9; --accent:#0b7a5c; --accent-ink:#fff; --accent-soft:#dcf1e9;
+  --ok:#17803d; --ok-soft:#e1f3e6; --bad:#b42318; --bad-soft:#fbe7e5;
+  --warn:#9a6200; --warn-soft:#fbf0d9; --focus:#1f8f6c;
+  --font-ui:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1513; --surface:#161e1b; --surface-2:#1d2724; --ink:#e5ece9; --ink-2:#a3b2ac;
+    --line:#2c3a35; --accent:#3fc79a; --accent-ink:#062018; --accent-soft:#173a2f;
+    --ok:#5fd08a; --ok-soft:#173322; --bad:#ff8a7d; --bad-soft:#3a1c19;
+    --warn:#f0b84f; --warn-soft:#3a2c12; --focus:#3fc79a; color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-ui)}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{margin:0;line-height:1.25}
+h1{font-size:1.1rem;font-weight:700}
+h2{font-size:1.25rem;font-weight:600}
+h3{font-size:1rem;font-weight:600}
+h4{font-size:.85rem;font-weight:600;margin-bottom:6px}
+.eyebrow{display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.muted{color:var(--ink-2);font-weight:400}
+.lede{margin:4px 0 0;color:var(--ink-2);max-width:65ch}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* top bar */
+.topbar{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand .sub{margin:0;font-size:.82rem;color:var(--ink-2)}
+.brand-mark{width:34px;height:34px;flex:none;fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.brand-mark rect:first-child{fill:var(--accent-soft)}
+.brand-mark rect:nth-child(2){fill:var(--surface)}
+
+main.wrap{display:flex;flex-direction:column;gap:20px;padding-block:20px 8px}
+.privacy{display:flex;gap:10px;align-items:flex-start;margin:0;font-size:.85rem;color:var(--ink-2)}
+.privacy svg{width:18px;height:18px;flex:none;fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5;margin-top:1px}
+
+/* section card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+
+/* grid form */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:.78rem;font-weight:600;color:var(--ink-2);letter-spacing:.02em}
+.field input,.field select{
+  font:inherit;font-size:.92rem;padding:9px 10px;border:1px solid var(--line);border-radius:6px;
+  background:var(--surface);color:var(--ink);min-height:40px;width:100%;
+}
+.field input:focus,.field select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.field small{font-size:.72rem;color:var(--ink-2)}
+.field .num{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:.72rem;font-weight:600;letter-spacing:.02em;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.8}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.info{background:var(--accent-soft);color:var(--accent)}
+
+/* buttons */
+.btn{font:inherit;font-size:.9rem;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.small{min-height:34px;padding:5px 11px;font-size:.82rem}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.status p{margin:0;font-size:.88rem;color:var(--ink-2)}
+.status p.err{color:var(--bad);font-weight:500}
+.status p.ok{color:var(--ok);font-weight:500}
+
+/* summary strip */
+.summary{display:flex;flex-wrap:wrap;gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 14px;min-width:120px}
+.stat b{display:block;font-family:var(--font-num);font-size:1.3rem;font-weight:500;font-variant-numeric:tabular-nums}
+.stat span{font-size:.72rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em}
+.stat.ok b{color:var(--ok)}
+.stat.bad b{color:var(--bad)}
+.stat.warn b{color:var(--warn)}
+
+/* item table */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table.items{width:100%;border-collapse:collapse;font-size:.86rem;min-width:880px}
+.items th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);font-weight:600;padding:10px 10px;border-bottom:1px solid var(--line);background:var(--surface-2);position:sticky;top:0;white-space:nowrap}
+.items td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.items tr:last-child td{border-bottom:none}
+.items .in{font:inherit;font-size:.84rem;padding:6px 8px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--ink);width:100%}
+.items .in:hover{border-color:var(--line)}
+.items .in:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft);background:var(--surface)}
+.items .num{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right}
+.items .calc{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-2)}
+.items .del{width:32px;text-align:center}
+.items .del button{background:none;border:none;color:var(--bad);cursor:pointer;font-size:1.1rem;padding:4px;border-radius:4px}
+.items .del button:hover{background:var(--bad-soft)}
+.items tfoot td{background:var(--surface-2);font-weight:600}
+
+/* output preview */
+.preview{background:#fff;color:#000;border:1px solid var(--line);border-radius:var(--r);padding:32px;font-family:"IBM Plex Sans",Arial,sans-serif;max-width:820px;margin:0 auto}
+.preview h2{color:#000;font-size:1.4rem;margin-bottom:4px}
+.preview .ph-sub{color:#555;font-size:.85rem;margin-bottom:24px}
+.preview .ph-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 24px;margin-bottom:20px;font-size:.86rem}
+.preview .ph-grid div{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:3px 0}
+.preview .ph-grid .k{color:#555}
+.preview .ph-grid .v{font-weight:600;font-family:"IBM Plex Mono",monospace}
+.preview table{width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:20px}
+.preview table th{background:#eef2f0;text-align:left;padding:8px;border:1px solid #ccc;font-size:.72rem;text-transform:uppercase}
+.preview table td{padding:6px 8px;border:1px solid #ddd}
+.preview table td.num{text-align:right;font-family:"IBM Plex Mono",monospace}
+.preview .totals{margin-left:auto;width:320px;font-size:.88rem}
+.preview .totals div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dotted #ccc}
+.preview .totals .grand{font-weight:700;font-size:1rem;border-top:2px solid #000;border-bottom:none;padding-top:8px;margin-top:4px}
+.preview .foot{margin-top:32px;font-size:.72rem;color:#777;border-top:1px solid #ddd;padding-top:10px}
+
+/* toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;font-size:.85rem;font-weight:500;z-index:100;opacity:0;transform:translateY(10px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+.foot{padding-block:16px 28px;font-size:.78rem;color:var(--ink-2)}
+.foot p{margin:0;max-width:80ch}
+
+@media (max-width:860px){
+  .grid2,.grid3{grid-template-columns:minmax(0,1fr)}
+  .brand .sub{display:none}
+  .preview{padding:20px}
+}
+@media (max-width:480px){
+  .actions .btn{flex:1 1 100%}
+  .preview .ph-grid{grid-template-columns:1fr}
+  .preview .totals{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* print: only the preview, full page, black on white */
+@media print{
+  body{background:#fff}
+  .topbar,.privacy,.actions,.status,.summary,.card-head .btn,.foot,.toast,#editSection,#emptyHint{display:none!important}
+  main.wrap{padding:0;gap:0}
+  .card{border:none;padding:0;background:#fff}
+  .preview{border:none;padding:0;max-width:100%;margin:0;box-shadow:none}
+  #outputSection{padding:0}
+  @page{margin:14mm}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="3" y="4" width="15" height="20" rx="2"/>
+        <rect x="14" y="8" width="15" height="20" rx="2"/>
+        <path d="M18 18l3 3 5-6"/>
+      </svg>
+      <div>
+        <h1>Tender Costing Sheet</h1>
+        <p class="sub">Enter the inputs — review — print or save as PDF</p>
+      </div>
+    </div>
+    <button class="btn ghost small" id="btnClear" type="button">Clear all</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="privacy">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l6 2.5v5c0 4-2.7 7-6 8.5C6.7 16.5 4 13.5 4 9.5v-5z"/></svg>
+    <span>Everything runs in this browser. Nothing is uploaded. Your draft is saved locally so you can close the tab and return — clearing the browser's site data removes it.</span>
+  </p>
+
+  <!-- ============ INPUT SECTION ============ -->
+  <section class="card" id="editSection">
+    <div class="card-head">
+      <div>
+        <span class="eyebrow">Step 1</span>
+        <h2>Document details</h2>
+        <p class="lede">Headline information for this tender. These appear at the top of the generated costing sheet.</p>
+      </div>
+      <span class="pill info" id="saveState">Not saved yet</span>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label for="tenderName">Tender name</label>
+        <input id="tenderName" type="text" placeholder="e.g. Supply of office furniture 2026" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="clientName">Client / buyer</label>
+        <input id="clientName" type="text" placeholder="e.g. Ministry of Education" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="refNo">Reference number</label>
+        <input id="refNo" type="text" placeholder="e.g. TC-2026-014" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label for="preparedBy">Prepared by</label>
+        <input id="preparedBy" type="text" placeholder="Manager name" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="preparedDate">Date</label>
+        <input id="preparedDate" type="date">
+      </div>
+      <div class="field">
+        <label for="validity">Validity (days)</label>
+        <input id="validity" type="number" min="1" step="1" value="30" class="num">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMMERCIAL TERMS ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <span class="eyebrow">Step 2</span>
+        <h2>Commercial terms</h2>
+        <p class="lede">Currency, exchange rate, CIF basis and tax. These drive the per-line conversions.</p>
+      </div>
+      <span class="pill" id="termsPill">Incomplete</span>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label for="foreignCurrency">Foreign currency</label>
+        <select id="foreignCurrency">
+          <option value="USD">USD — US Dollar</option>
+          <option value="EUR">EUR — Euro</option>
+          <option value="GBP">GBP — British Pound</option>
+          <option value="CNY">CNY — Chinese Yuan</option>
+          <option value="INR">INR — Indian Rupee</option>
+          <option value="JPY">JPY — Japanese Yen</option>
+          <option value="AUD">AUD — Australian Dollar</option>
+          <option value="SGD">SGD — Singapore Dollar</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="localCurrency">Local currency</label>
+        <select id="localCurrency">
+          <option value="LKR" selected>LKR — Sri Lankan Rupee</option>
+          <option value="USD">USD — US Dollar</option>
+          <option value="EUR">EUR — Euro</option>
+          <option value="INR">INR — Indian Rupee</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="exchangeRate">Exchange rate <span class="muted">(1 foreign = ? local)</span></label>
+        <input id="exchangeRate" type="number" min="0" step="0.0001" placeholder="e.g. 305.7500" class="num">
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label for="cifBasis">CIF basis</label>
+        <select id="cifBasis">
+          <option value="CIF">CIF — Cost, Insurance &amp; Freight</option>
+          <option value="FOB">FOB — Free On Board</option>
+          <option value="CFR">CFR — Cost &amp; Freight</option>
+          <option value="EXW">EXW — Ex Works</option>
+          <option value="DDP">DDP — Delivered Duty Paid</option>
+        </select>
+        <small>Cost per unit below is entered on this basis.</small>
+      </div>
+      <div class="field">
+        <label for="taxPct">Tax %</label>
+        <input id="taxPct" type="number" min="0" max="100" step="0.01" value="18" class="num">
+        <small>Applied to the converted cost.</small>
+      </div>
+      <div class="field">
+        <label for="marginPct">Margin % <span class="muted">(optional)</span></label>
+        <input id="marginPct" type="number" min="0" max="500" step="0.01" value="10" class="num">
+        <small>Added after tax to give the sell price.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LINE ITEMS ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <span class="eyebrow">Step 3</span>
+        <h2>Line items</h2>
+        <p class="lede">One row per item. The unit price is entered in the <strong>foreign currency</strong> on the selected CIF basis; the row shows the converted cost, tax and sell price live.</p>
+      </div>
+      <button class="btn small primary" type="button" id="btnAddRow">+ Add line</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="items" id="itemsTable">
+        <thead>
+          <tr>
+            <th style="min-width:120px">HS code</th>
+            <th style="min-width:180px">Description</th>
+            <th style="width:80px">Qty</th>
+            <th style="width:130px">Cost / unit <span class="muted">(foreign)</span></th>
+            <th style="width:130px">Cost / unit <span class="muted">(local)</span></th>
+            <th style="width:120px">Tax</th>
+            <th style="width:130px">Sell / unit</th>
+            <th style="width:140px">Line total <span class="muted">(sell)</span></th>
+            <th class="del"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="7" style="text-align:right">Totals</td>
+            <td class="num" id="grandTotal">—</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="summary" id="summaryStrip">
+      <div class="stat"><b id="sumQty">0</b><span>Total qty</span></div>
+      <div class="stat"><b id="sumCostLocal">0.00</b><span>Cost (local)</span></div>
+      <div class="stat"><b id="sumTax">0.00</b><span>Tax</span></div>
+      <div class="stat ok"><b id="sumSell">0.00</b><span>Sell total</span></div>
+      <div class="stat warn"><b id="sumMargin">0.00</b><span>Margin</span></div>
+    </div>
+  </section>
+
+  <!-- ============ ACTIONS ============ -->
+  <section class="card">
+    <div class="actions">
+      <button class="btn primary" type="button" id="btnPreview">Generate costing sheet</button>
+      <button class="btn" type="button" id="btnPrint" disabled>Print / Save as PDF</button>
+      <button class="btn" type="button" id="btnJson" disabled>Download JSON</button>
+      <button class="btn" type="button" id="btnCsv" disabled>Download CSV</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite">
+      <p id="statusText">Fill in the details above. The preview updates only when you click Generate.</p>
+    </div>
+  </section>
+
+  <!-- ============ OUTPUT SECTION ============ -->
+  <section class="card" id="outputSection" hidden>
+    <div class="card-head">
+      <div>
+        <span class="eyebrow">Step 4</span>
+        <h2>Costing sheet</h2>
+        <p class="lede">This is exactly what will print. Use <strong>Print / Save as PDF</strong> to produce the final file.</p>
+      </div>
+      <span class="pill ok">Ready</span>
+    </div>
+
+    <div class="preview" id="preview">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap foot">
+  <p>This sheet is generated from the inputs above. No data is sent to any server. The Print dialog’s <strong>Save as PDF</strong> option produces the file to attach to a tender submission.</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const STORAGE_KEY = 'tender-costing:v1';
+
+  /* ---------- state ---------- */
+  const state = {
+    meta: { tenderName:'', clientName:'', refNo:'', preparedBy:'', preparedDate:'', validity:30 },
+    terms: { foreignCurrency:'USD', localCurrency:'LKR', exchangeRate:'', cifBasis:'CIF', taxPct:18, marginPct:10 },
+    items: [
+      { id: uid(), hsCode:'', description:'', qty:'1', costUnit:'', }
+    ],
+    generatedAt: null,
+  };
+
+  function uid(){ return 'r' + Math.random().toString(36).slice(2,9); }
+
+  /* ---------- number helpers ---------- */
+  const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g,'')); return isFinite(n) ? n : 0; };
+  const fmt2 = n => (Math.round((n + Number.EPSILON) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const fmt4 = n => (Math.round((n + Number.EPSILON) * 10000) / 10000).toString();
+  const fmtInt = n => Math.round(n).toLocaleString();
+
+  /* ---------- calculation ---------- */
+  function calcLine(it, terms){
+    const qty = num(it.qty);
+    const costForeign = num(it.costUnit);
+    const rate = num(terms.exchangeRate);
+    const taxPct = num(terms.taxPct);
+    const marginPct = num(terms.marginPct);
+
+    const costLocal = costForeign * rate;
+    const taxAmount = costLocal * (taxPct / 100);
+    const withTax = costLocal + taxAmount;
+    const sellUnit = withTax * (1 + marginPct / 100);
+    const lineTotal = sellUnit * qty;
+    const marginAmount = (sellUnit - withTax) * qty;
+
+    return { qty, costForeign, costLocal, taxAmount, withTax, sellUnit, lineTotal, marginAmount, rate, taxPct, marginPct };
+  }
+
+  function calcTotals(){
+    let qty=0, costLocal=0, tax=0, sell=0, margin=0;
+    state.items.forEach(it => {
+      const c = calcLine(it, state.terms);
+      qty += c.qty;
+      costLocal += c.costLocal * c.qty;
+      tax += c.taxAmount * c.qty;
+      sell += c.lineTotal;
+      margin += c.marginAmount;
+    });
+    return { qty, costLocal, tax, sell, margin };
+  }
+
+  /* ---------- persistence ---------- */
+  let saveTimer = null;
+  function save(){
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      $('#saveState').textContent = 'Saved locally';
+      $('#saveState').className = 'pill ok';
+    } catch (e) {
+      $('#saveState').textContent = 'Could not save';
+      $('#saveState').className = 'pill bad';
+    }
+  }
+  function queueSave(){
+    $('#saveState').textContent = 'Saving…';
+    $('#saveState').className = 'pill info';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 400);
+  }
+  function load(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved && typeof saved === 'object') {
+        Object.assign(state.meta, saved.meta || {});
+        Object.assign(state.terms, saved.terms || {});
+        if (Array.isArray(saved.items) && saved.items.length) state.items = saved.items.map(i => ({ id: i.id || uid(), hsCode:i.hsCode||'', description:i.description||'', qty:i.qty??'1', costUnit:i.costUnit||'' }));
+        $('#saveState').textContent = 'Draft restored';
+        $('#saveState').className = 'pill info';
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- form binding ---------- */
+  function bindMeta(){
+    ['tenderName','clientName','refNo','preparedBy','preparedDate','validity'].forEach(k => {
+      const el = $('#' + k);
+      el.value = state.meta[k] ?? '';
+      el.addEventListener('input', () => { state.meta[k] = el.value; queueSave(); invalidateOutput(); });
+    });
+  }
+  function bindTerms(){
+    ['foreignCurrency','localCurrency','exchangeRate','cifBasis','taxPct','marginPct'].forEach(k => {
+      const el = $('#' + k);
+      el.value = state.terms[k] ?? '';
+      el.addEventListener('input', () => { state.terms[k] = el.value; queueSave(); renderTable(); invalidateOutput(); });
+      el.addEventListener('change', () => { state.terms[k] = el.value; queueSave(); renderTable(); invalidateOutput(); });
+    });
+  }
+
+  /* ---------- table rendering ---------- */
+  function renderTable(){
+    const tbody = $('#itemsBody');
+    tbody.innerHTML = '';
+    state.items.forEach((it, idx) => {
+      const c = calcLine(it, state.terms);
+      const tr = document.createElement('tr');
+      tr.dataset.id = it.id;
+      tr.innerHTML = `
+        <td><input class="in" data-k="hsCode" value="${escAttr(it.hsCode)}" placeholder="e.g. 9403.30" autocomplete="off"></td>
+        <td><input class="in" data-k="description" value="${escAttr(it.description)}" placeholder="Item description" autocomplete="off"></td>
+        <td><input class="in num" data-k="qty" value="${escAttr(it.qty)}" inputmode="decimal" autocomplete="off"></td>
+        <td><input class="in num" data-k="costUnit" value="${escAttr(it.costUnit)}" inputmode="decimal" placeholder="0.00" autocomplete="off"></td>
+        <td class="calc">${state.terms.exchangeRate && it.costUnit ? fmt2(c.costLocal) : '—'}</td>
+        <td class="calc">${state.terms.taxPct !== '' && it.costUnit && state.terms.exchangeRate ? fmt2(c.taxAmount) : '—'}</td>
+        <td class="calc">${it.costUnit && state.terms.exchangeRate ? fmt2(c.sellUnit) : '—'}</td>
+        <td class="calc">${it.costUnit && state.terms.exchangeRate ? fmt2(c.lineTotal) : '—'}</td>
+        <td class="del"><button type="button" title="Remove line" aria-label="Remove line">×</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    if (!state.items.length) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td colspan="9" style="text-align:center;color:var(--ink-2);padding:24px">No line items yet. Click <strong>+ Add line</strong>.</td>`;
+      tbody.appendChild(tr);
+    }
+    updateSummary();
+    updateTermsPill();
+    updatePrintButton();
+  }
+
+  function updateSummary(){
+    const t = calcTotals();
+    const lc = state.terms.localCurrency || '';
+    $('#grandTotal').textContent = t.sell ? `${fmt2(t.sell)} ${lc}` : '—';
+    $('#sumQty').textContent = fmtInt(t.qty);
+    $('#sumCostLocal').textContent = fmt2(t.costLocal);
+    $('#sumTax').textContent = fmt2(t.tax);
+    $('#sumSell').textContent = fmt2(t.sell);
+    $('#sumMargin').textContent = fmt2(t.margin);
+  }
+
+  function updateTermsPill(){
+    const p = $('#termsPill');
+    const t = state.terms;
+    const ready = t.exchangeRate !== '' && num(t.exchangeRate) > 0 && t.taxPct !== '' && t.foreignCurrency && t.localCurrency;
+    if (ready) { p.textContent = `1 ${t.foreignCurrency} = ${fmt4(num(t.exchangeRate))} ${t.localCurrency}`; p.className = 'pill ok'; }
+    else { p.textContent = 'Incomplete — set currency and exchange rate'; p.className = 'pill warn'; }
+  }
+
+  function updatePrintButton(){
+    const ready = hasEverythingForOutput();
+    $('#btnPrint').disabled = !ready || !state.generatedAt;
+    $('#btnJson').disabled = !ready || !state.generatedAt;
+    $('#btnCsv').disabled = !ready || !state.generatedAt;
+  }
+
+  function hasEverythingForOutput(){
+    return state.items.some(it => it.costUnit && num(it.costUnit) > 0 && num(it.qty) > 0)
+      && num(state.terms.exchangeRate) > 0;
+  }
+
+  /* ---------- table events ---------- */
+  $('#itemsBody').addEventListener('input', e => {
+    const inp = e.target.closest('.in'); if (!inp) return;
+    const tr = inp.closest('tr'); const it = state.items.find(i => i.id === tr.dataset.id);
+    if (!it) return;
+    it[inp.dataset.k] = inp.value;
+    queueSave();
+    // re-render only computed cells to preserve focus
+    const c = calcLine(it, state.terms);
+    const cells = tr.querySelectorAll('td.calc');
+    cells[0].textContent = state.terms.exchangeRate && it.costUnit ? fmt2(c.costLocal) : '—';
+    cells[1].textContent = state.terms.taxPct !== '' && it.costUnit && state.terms.exchangeRate ? fmt2(c.taxAmount) : '—';
+    cells[2].textContent = it.costUnit && state.terms.exchangeRate ? fmt2(c.sellUnit) : '—';
+    cells[3].textContent = it.costUnit && state.terms.exchangeRate ? fmt2(c.lineTotal) : '—';
+    updateSummary();
+    invalidateOutput();
+  });
+
+  $('#itemsBody').addEventListener('click', e => {
+    if (e.target.closest('.del button')) {
+      const tr = e.target.closest('tr');
+      state.items = state.items.filter(i => i.id !== tr.dataset.id);
+      queueSave(); renderTable(); invalidateOutput();
+    }
+  });
+
+  $('#btnAddRow').addEventListener('click', () => {
+    state.items.push({ id: uid(), hsCode:'', description:'', qty:'1', costUnit:'' });
+    queueSave(); renderTable(); invalidateOutput();
+    // focus the new row's HS code
+    const rows = $$('#itemsBody tr');
+    const last = rows[rows.length - 1];
+    last?.querySelector('[data-k="hsCode"]')?.focus();
+  });
+
+  /* ---------- output ---------- */
+  function invalidateOutput(){
+    if (state.generatedAt) {
+      state.generatedAt = null;
+      $('#outputSection').hidden = true;
+      setStatus('Inputs changed. Click Generate costing sheet to refresh the output.', '');
+    }
+    updatePrintButton();
+  }
+
+  function setStatus(msg, kind){
+    const p = $('#statusText');
+    p.textContent = msg;
+    p.className = kind || '';
+  }
+
+  $('#btnPreview').addEventListener('click', () => {
+    if (!hasEverythingForOutput()) {
+      setStatus('Enter at least one line with a unit cost and quantity, and set the exchange rate.', 'err');
+      return;
+    }
+    const missing = [];
+    if (!state.meta.tenderName) missing.push('Tender name');
+    if (!state.meta.preparedBy) missing.push('Prepared by');
+    if (missing.length) setStatus(`Heads-up: ${missing.join(', ')} not filled in. The sheet will still generate.`, '');
+    else setStatus('Costing sheet generated. Review it below, then print or save as PDF.', 'ok');
+
+    state.generatedAt = new Date().toISOString();
+    renderPreview();
+    $('#outputSection').hidden = false;
+    $('#outputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updatePrintButton();
+    toast('Costing sheet generated');
+  });
+
+  function renderPreview(){
+    const m = state.meta, t = state.terms;
+    const rate = num(t.exchangeRate);
+    const taxPct = num(t.taxPct);
+    const marginPct = num(t.marginPct);
+    const rows = state.items.filter(it => it.costUnit !== '' || it.description || it.hsCode);
+    const totals = calcTotals();
+
+    const dt = m.preparedDate ? new Date(m.preparedDate + 'T00:00:00').toLocaleDateString() : new Date().toLocaleDateString();
+    const exp = new Date(Date.now() + (num(m.validity) || 30) * 86400000).toLocaleDateString();
+
+    const rowsHtml = rows.map((it, i) => {
+      const c = calcLine(it, t);
+      return `<tr>
+        <td>${escHtml(it.hsCode || '—')}</td>
+        <td>${escHtml(it.description || '—')}</td>
+        <td class="num">${fmtInt(c.qty)}</td>
+        <td class="num">${fmt2(c.costForeign)} ${escHtml(t.foreignCurrency)}</td>
+        <td class="num">${fmt2(c.costLocal)} ${escHtml(t.localCurrency)}</td>
+        <td class="num">${fmt2(c.taxAmount)}</td>
+        <td class="num">${fmt2(c.sellUnit)}</td>
+        <td class="num">${fmt2(c.lineTotal)}</td>
+      </tr>`;
+    }).join('');
+
+    $('#preview').innerHTML = `
+      <h2>${escHtml(m.tenderName || 'Tender costing sheet')}</h2>
+      <div class="ph-sub">
+        ${m.refNo ? 'Ref: ' + escHtml(m.refNo) + ' · ' : ''}
+        Prepared ${escHtml(dt)} · Valid until ${escHtml(exp)} (${num(m.validity)||30} days)
+      </div>
+      <div class="ph-grid">
+        <div><span class="k">Client / buyer</span><span class="v">${escHtml(m.clientName || '—')}</span></div>
+        <div><span class="k">Prepared by</span><span class="v">${escHtml(m.preparedBy || '—')}</span></div>
+        <div><span class="k">Foreign currency</span><span class="v">${escHtml(t.foreignCurrency)}</span></div>
+        <div><span class="k">Local currency</span><span class="v">${escHtml(t.localCurrency)}</span></div>
+        <div><span class="k">Exchange rate</span><span class="v">1 ${escHtml(t.foreignCurrency)} = ${fmt4(rate)} ${escHtml(t.localCurrency)}</span></div>
+        <div><span class="k">CIF basis</span><span class="v">${escHtml(t.cifBasis)}</span></div>
+        <div><span class="k">Tax</span><span class="v">${fmt2(taxPct)}%</span></div>
+        <div><span class="k">Margin</span><span class="v">${fmt2(marginPct)}%</span></div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>HS code</th><th>Description</th><th>Qty</th>
+          <th>Cost/unit (${escHtml(t.foreignCurrency)})</th>
+          <th>Cost/unit (${escHtml(t.localCurrency)})</th>
+          <th>Tax/unit</th><th>Sell/unit</th><th>Line total</th>
+        </tr></thead>
+        <tbody>${rowsHtml || '<tr><td colspan="8" style="text-align:center;color:#777">No lines</td></tr>'}</tbody>
+      </table>
+      <div class="totals">
+        <div><span>Total cost (${escHtml(t.localCurrency)})</span><span>${fmt2(totals.costLocal)}</span></div>
+        <div><span>Total tax</span><span>${fmt2(totals.tax)}</span></div>
+        <div><span>Total margin</span><span>${fmt2(totals.margin)}</span></div>
+        <div class="grand"><span>Total sell</span><span>${fmt2(totals.sell)} ${escHtml(t.localCurrency)}</span></div>
+      </div>
+      <div class="foot">
+        Generated ${new Date(state.generatedAt).toLocaleString()}. All amounts in ${escHtml(t.localCurrency)} unless stated otherwise.
+        Cost per unit is entered in ${escHtml(t.foreignCurrency)} on a ${escHtml(t.cifBasis)} basis and converted at the stated rate.
+      </div>
+    `;
+  }
+
+  /* ---------- print ---------- */
+  $('#btnPrint').addEventListener('click', () => {
+    if (!state.generatedAt) return;
+    window.print();
+  });
+
+  /* ---------- downloads ---------- */
+  function download(name, data, type){
+    const blob = data instanceof Blob ? data : new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+  const baseName = () => (state.meta.refNo || state.meta.tenderName || 'tender').replace(/[^\w\-]+/g,'_').slice(0,60);
+
+  $('#btnJson').addEventListener('click', () => {
+    if (!state.generatedAt) return;
+    const payload = buildPayload();
+    download(`${baseName()}_costing.json`, JSON.stringify(payload, null, 2), 'application/json');
+    toast('JSON downloaded');
+  });
+  $('#btnCsv').addEventListener('click', () => {
+    if (!state.generatedAt) return;
+    const rows = [['HS code','Description','Qty','Cost/unit ('+state.terms.foreignCurrency+')','Cost/unit ('+state.terms.localCurrency+')','Tax/unit','Sell/unit','Line total']];
+    state.items.forEach(it => {
+      const c = calcLine(it, state.terms);
+      rows.push([it.hsCode, it.description, c.qty, c.costForeign.toFixed(2), c.costLocal.toFixed(2), c.taxAmount.toFixed(2), c.sellUnit.toFixed(2), c.lineTotal.toFixed(2)]);
+    });
+    const t = calcTotals();
+    rows.push([]); rows.push(['','','','','','','Total cost', t.costLocal.toFixed(2)]); rows.push(['','','','','','','Total tax', t.tax.toFixed(2)]); rows.push(['','','','','','','Total margin', t.margin.toFixed(2)]); rows.push(['','','','','','','Total sell', t.sell.toFixed(2)]);
+    const csv = '\uFEFF' + rows.map(r => r.map(v => `"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    download(`${baseName()}_costing.csv`, csv, 'text/csv;charset=utf-8');
+    toast('CSV downloaded');
+  });
+
+  function buildPayload(){
+    return {
+      generatedAt: state.generatedAt,
+      meta: state.meta,
+      terms: state.terms,
+      items: state.items.map(it => {
+        const c = calcLine(it, state.terms);
+        return { ...it, computed: c };
+      }),
+      totals: calcTotals(),
+    };
+  }
+
+  /* ---------- clear ---------- */
+  $('#btnClear').addEventListener('click', () => {
+    if (!confirm('Clear everything and start over? Your draft will be deleted from this browser.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state.meta = { tenderName:'', clientName:'', refNo:'', preparedBy:'', preparedDate:'', validity:30 };
+    state.terms = { foreignCurrency:'USD', localCurrency:'LKR', exchangeRate:'', cifBasis:'CIF', taxPct:18, marginPct:10 };
+    state.items = [{ id: uid(), hsCode:'', description:'', qty:'1', costUnit:'' }];
+    state.generatedAt = null;
+    ['tenderName','clientName','refNo','preparedBy'].forEach(k => $('#'+k).value = '');
+    $('#preparedDate').value = ''; $('#validity').value = 30;
+    $('#foreignCurrency').value = 'USD'; $('#localCurrency').value = 'LKR';
+    $('#exchangeRate').value = ''; $('#cifBasis').value = 'CIF';
+    $('#taxPct').value = 18; $('#marginPct').value = 10;
+    $('#outputSection').hidden = true;
+    $('#saveState').textContent = 'Not saved yet'; $('#saveState').className = 'pill';
+    setStatus('Cleared. Enter the details to start again.', '');
+    renderTable(); updatePrintButton();
+  });
+
+  /* ---------- helpers ---------- */
+  function escHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function escAttr(s){ return escHtml(s); }
+  let toastT = null;
+  function toast(msg){
+    const el = $('#toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  /* ---------- init ---------- */
+  load();
+  bindMeta();
+  bindTerms();
+  renderTable();
+  updatePrintButton();
+  if (state.generatedAt === null && hasEverythingForOutput()) {
+    setStatus('Draft restored. Click Generate costing sheet when ready.', '');
+  }
+  $('#saveState').addEventListener('click', save);
+
+  // expose for debugging / testing
+  window.__tender = { state, calcLine, calcTotals, renderPreview };
+})();
+</script>
+</body>
+</html>
