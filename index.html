@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tender Costing Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="24" height="20" rx="2"/>
+        <path d="M9 14h14M9 18h10M9 22h6"/>
+      </svg>
+      <div>
+        <h1>Tender Costing Sheet</h1>
+        <p class="sub">HS code once → products → margin &amp; taxes → A4 sheet</p>
+      </div>
+    </div>
+    <button class="btn ghost small" id="btnClear" type="button">Clear all</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 1. HEADER -->
+  <section class="card" id="editSection">
+    <div class="card-head">
+      <div><span class="eyebrow">Document</span><h2>Costing header</h2></div>
+      <span class="pill info" id="saveState">Not saved</span>
+    </div>
+    <div class="grid3">
+      <div class="field"><label for="title">Title</label><input id="title" type="text"></div>
+      <div class="field"><label for="supplier">Supplier / origin</label><input id="supplier" type="text"></div>
+      <div class="field"><label for="date">Date</label><input id="date" type="date"></div>
+    </div>
+    <div class="grid3">
+      <div class="field"><label for="preparedBy">Prepared by</label><input id="preparedBy" type="text"></div>
+      <div class="field"><label for="reference">Reference</label><input id="reference" type="text"></div>
+      <div class="field"><label for="scenario">Scenario</label>
+        <select id="scenario">
+          <option value="base">Base</option>
+          <option value="inc5">5% increase</option>
+          <option value="inc10">10% increase</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. GLOBAL TERMS & DUTIES -->
+  <section class="card">
+    <div class="card-head">
+      <div><span class="eyebrow">Terms</span><h2>Global terms &amp; duties</h2></div>
+      <span class="pill" id="termsPill">—</span>
+    </div>
+    <div class="grid4">
+      <div class="field"><label for="foreignCurrency">Foreign currency</label>
+        <select id="foreignCurrency"><option value="USD" selected>USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
+      </div>
+      <div class="field"><label for="localCurrency">Local currency</label>
+        <select id="localCurrency"><option value="LKR" selected>LKR</option></select>
+      </div>
+      <div class="field"><label for="exchangeRate">Exchange rate (1 foreign = ? local)</label>
+        <input id="exchangeRate" type="number" min="0" step="0.0001" class="num">
+      </div>
+      <div class="field"><label for="crossRate">Cross rate (optional)</label>
+        <input id="crossRate" type="number" min="0" step="0.00001" class="num">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="hsCode">HS code — applies to every product</label>
+        <select id="hsCode"></select>
+        <small id="hsRates" class="muted"></small>
+      </div>
+      <div class="field">
+        <label for="apMarkup">VAT/SSCL base uplift (multiplier)</label>
+        <input id="apMarkup" type="number" min="0" step="0.0001" value="1.00" class="num">
+        <small>1.10 = +10% on CIP before VAT/SSCL. Does not change landed cost.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PRODUCT LINES — name / qty / price ONLY -->
+  <section class="card">
+    <div class="card-head">
+      <div><span class="eyebrow">Products</span><h2>Product lines</h2>
+        <p class="lede">Only the product name, quantity and supplier price are entered per line. All rates come from Margin &amp; Taxes below.</p>
+      </div>
+      <button class="btn small primary" type="button" id="btnAddRow">+ Add product</button>
+    </div>
+    <div class="table-wrap">
+      <table class="li" id="itemsTable">
+        <thead>
+          <tr>
+            <th style="min-width:320px">Product name</th>
+            <th style="width:110px">Qty</th>
+            <th style="width:180px">FCA / CIP $</th>
+            <th class="del"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. MARGIN & TAXES (global, applied to every product) -->
+  <section class="card" id="ratesCard">
+    <div class="card-head">
+      <div><span class="eyebrow">Rates</span><h2>Margin &amp; Taxes</h2>
+        <p class="lede">These values apply to every product line above.</p>
+      </div>
+    </div>
+    <div class="grid4">
+      <div class="field"><label for="gsMarginPct">GS Margin with Prom. %</label>
+        <input id="gsMarginPct" type="number" min="0" step="0.01" value="20" class="num"></div>
+      <div class="field"><label for="ssclPct">SSCL %</label>
+        <input id="ssclPct" type="number" min="0" step="0.001" value="1.25" class="num">
+        <small>e.g. 1.25 for “SSCL – 1.25% (50%)”.</small>
+      </div>
+      <div class="field"><label for="vatPct">VAT %</label>
+        <input id="vatPct" type="number" min="0" step="0.01" value="18" class="num"></div>
+      <div class="field"><label for="wsMarginPct">W/S Margin %</label>
+        <input id="wsMarginPct" type="number" min="0" step="0.01" value="8" class="num"></div>
+    </div>
+    <div class="grid4">
+      <div class="field"><label for="retailerPct">Retailer Margin %</label>
+        <input id="retailerPct" type="number" min="0" step="0.01" value="12" class="num"></div>
+    </div>
+  </section>
+
+  <!-- 5. ACTIONS -->
+  <section class="card">
+    <div class="actions">
+      <button class="btn primary" type="button" id="btnPreview">Generate costing sheet</button>
+      <button class="btn" type="button" id="btnPrint" disabled>Print / Save as PDF</button>
+      <button class="btn" type="button" id="btnJson" disabled>Download JSON</button>
+      <button class="btn" type="button" id="btnCsv" disabled>Download CSV</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite">
+      <p id="statusText">Pick an HS code, add products, generate.</p>
+    </div>
+  </section>
+
+  <!-- 6. OUTPUT -->
+  <section class="card" id="outputCard" hidden>
+    <div class="card-head">
+      <div><span class="eyebrow">Output</span><h2>Costing sheet (A4 portrait)</h2></div>
+      <span class="pill ok">Ready</span>
+    </div>
+    <div class="preview-shell">
+      <div class="preview" id="preview"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap foot">
+  <p>Stateless — no server, no login. Everything runs in this browser. Print → Save as PDF for the final file.</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="hs-codes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
