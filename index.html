@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tender Costing Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="24" height="20" rx="2"/>
+        <path d="M9 14h14M9 18h10M9 22h6"/>
+      </svg>
+      <div>
+        <h1>Tender Costing Sheet</h1>
+        <p class="sub">HS code → products → extras → margins → A4 sheet</p>
+      </div>
+    </div>
+    <button class="btn ghost small" id="btnClear" type="button">Clear all</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 1. HEADER -->
+  <section class="card" id="editSection">
+    <div class="card-head">
+      <div><span class="eyebrow">Document</span><h2>Costing header</h2></div>
+      <span class="pill info" id="saveState">Not saved</span>
+    </div>
+    <div class="grid3">
+      <div class="field"><label for="title">Title</label><input id="title" type="text"></div>
+      <div class="field"><label for="supplier">Supplier / origin</label><input id="supplier" type="text"></div>
+      <div class="field"><label for="date">Date</label><input id="date" type="date"></div>
+    </div>
+    <div class="grid4">
+      <div class="field"><label for="preparedBy">Prepared by</label><input id="preparedBy" type="text"></div>
+      <div class="field"><label for="reference">Reference</label><input id="reference" type="text"></div>
+      <div class="field"><label for="validity">Validity (days)</label>
+        <input id="validity" type="number" min="1" step="1" value="30" class="num"></div>
+      <div class="field">&nbsp;</div>
+    </div>
+  </section>
+
+  <!-- 2. GLOBAL TERMS & DUTIES -->
+  <section class="card">
+    <div class="card-head">
+      <div><span class="eyebrow">Terms</span><h2>Global terms &amp; duties</h2></div>
+      <span class="pill" id="termsPill">—</span>
+    </div>
+    <div class="grid4">
+      <div class="field"><label for="foreignCurrency">Foreign currency</label>
+        <select id="foreignCurrency"><option value="USD" selected>USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
+      </div>
+      <div class="field"><label for="localCurrency">Local currency</label>
+        <select id="localCurrency"><option value="LKR" selected>LKR</option></select>
+      </div>
+      <div class="field"><label for="exchangeRate">Exchange rate (1 foreign = ? local)</label>
+        <input id="exchangeRate" type="number" min="0" step="0.0001" class="num">
+      </div>
+      <div class="field"><label for="crossRate">Cross rate (optional)</label>
+        <input id="crossRate" type="number" min="0" step="0.00001" class="num">
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label for="hsCode">HS code — applies to every product</label>
+        <select id="hsCode"></select>
+        <small id="hsRates" class="muted"></small>
+      </div>
+      <div class="field">
+        <label for="clearingPct">Clearing &amp; other charges %</label>
+        <input id="clearingPct" type="number" min="0" step="0.01" value="8" class="num">
+        <small>Applied to CIP Rs.</small>
+      </div>
+      <div class="field">
+        <label for="vatUplift">VAT/SSCL base uplift</label>
+        <input id="vatUplift" type="number" min="0" step="0.01" value="1.10" class="num">
+        <small>Multiplier on CIP before landed-stage VAT/SSCL. 1.10 = +10%.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PRODUCT LINES -->
+  <section class="card">
+    <div class="card-head">
+      <div><span class="eyebrow">Products</span><h2>Product lines</h2></div>
+      <button class="btn small primary" type="button" id="btnAddRow">+ Add product</button>
+    </div>
+    <div class="table-wrap">
+      <table class="li" id="itemsTable">
+        <thead>
+          <tr>
+            <th style="min-width:320px">Product name</th>
+            <th style="width:110px">Qty</th>
+            <th style="width:180px">FCA / CIP $</th>
+            <th class="del"></th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. ADDITIONAL LANDED-COST ITEMS -->
+  <section class="card" id="extrasCard">
+    <div class="card-head">
+      <div><span class="eyebrow">Extras</span><h2>Additional landed-cost items</h2></div>
+      <button class="btn small primary" type="button" id="btnAddExtra">+ Add item</button>
+    </div>
+    <div class="table-wrap">
+      <table class="li" id="extrasTable">
+        <thead>
+          <tr>
+            <th style="min-width:260px">Description</th>
+            <th style="width:200px">Basis</th>
+            <th style="width:140px">Value</th>
+            <th style="width:160px">Amount (Rs)</th>
+            <th class="del"></th>
+          </tr>
+        </thead>
+        <tbody id="extrasBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="text-align:right;font-weight:600">Total additional</td>
+            <td class="num" id="extrasTotal">—</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. MARGIN & TAXES (forward block + downstream inputs) -->
+  <section class="card" id="ratesCard">
+    <div class="card-head">
+      <div><span class="eyebrow">Rates</span><h2>Margin &amp; Taxes</h2>
+        <p class="lede">Forward block runs from landed cost to MRP. The downstream block starts from A/Price entered below.</p>
+      </div>
+    </div>
+
+    <!-- Forward block -->
+    <h3 style="margin-top:4px">Forward — cost to MRP</h3>
+    <div class="grid4">
+      <div class="field">
+        <label for="gsMarginMode">GS Margin with Prom. mode</label>
+        <select id="gsMarginMode">
+          <option value="pct" selected>Percentage</option>
+          <option value="fixed">Fixed amount (Rs)</option>
+        </select>
+      </div>
+      <div class="field"><label for="gsMarginPct">GS Margin with Prom. %</label>
+        <input id="gsMarginPct" type="number" min="0" step="0.01" value="20" class="num"></div>
+      <div class="field"><label for="gsMarginFixed">GS Margin fixed (Rs)</label>
+        <input id="gsMarginFixed" type="number" min="0" step="0.01" value="0" class="num"></div>
+      <div class="field"><label for="nbtPct">NBT % (on GS ex-tax)</label>
+        <input id="nbtPct" type="number" min="0" step="0.01" value="0" class="num"></div>
+    </div>
+    <div class="grid4">
+      <div class="field"><label for="vatGsPct">VAT % (on GS ex-tax + NBT)</label>
+        <input id="vatGsPct" type="number" min="0" step="0.01" value="0" class="num"></div>
+      <div class="field"><label for="wsMarginPct">W/S Margin % (on AP cost)</label>
+        <input id="wsMarginPct" type="number" min="0" step="0.01" value="0" class="num"></div>
+      <div class="field"><label for="retailerPct">Retailer Margin % (on WS price)</label>
+        <input id="retailerPct" type="number" min="0" step="0.01" value="0" class="num"></div>
+      <div class="field"><label for="ssclPct">SSCL % (landed stage)</label>
+        <input id="ssclPct" type="number" min="0" step="0.001" value="1.25" class="num">
+        <small>Pre-filled from HS code.</small>
+      </div>
+    </div>
+
+    <!-- Downstream block -->
+    <h3 style="margin-top:8px">Downstream — from A/Price</h3>
+    <div class="grid4">
+      <div class="field"><label for="aPriceInput">A/Price (Rs.) — user input</label>
+        <input id="aPriceInput" type="number" min="0" step="0.01" class="num">
+        <small>Enter the final invoiced price.</small>
+      </div>
+      <div class="field"><label for="wsOutPct">W/S/Price (Rs.) % (on A/Price)</label>
+        <input id="wsOutPct" type="number" min="0" step="0.01" value="8" class="num">
+        <small>Default 8%.</small>
+      </div>
+      <div class="field"><label for="mrpInput">MRP input (Rs.) — user</label>
+        <input id="mrpInput" type="number" min="0" step="0.01" class="num">
+        <small>Used for backward margin % only.</small>
+      </div>
+      <div class="field"><label for="vatPct">VAT % (landed stage)</label>
+        <input id="vatPct" type="number" min="0" step="0.01" value="18" class="num">
+        <small>Pre-filled from HS code.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. ACTIONS -->
+  <section class="card">
+    <div class="actions">
+      <button class="btn primary" type="button" id="btnPreview">Generate costing sheet</button>
+      <button class="btn" type="button" id="btnPrint" disabled>Print / Save as PDF</button>
+      <button class="btn" type="button" id="btnJson" disabled>Download JSON</button>
+      <button class="btn" type="button" id="btnCsv" disabled>Download CSV</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite">
+      <p id="statusText">Pick an HS code, add products, generate.</p>
+    </div>
+  </section>
+
+  <!-- 7. OUTPUT -->
+  <section class="card" id="outputCard" hidden>
+    <div class="card-head">
+      <div><span class="eyebrow">Output</span><h2>Costing sheet (A4 portrait)</h2></div>
+      <span class="pill ok">Ready</span>
+    </div>
+    <div class="preview-shell">
+      <div class="preview" id="preview"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap foot">
+  <p>Stateless — no server, no login. Everything runs in this browser. Print → Save as PDF for the final file.</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="hs-codes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
