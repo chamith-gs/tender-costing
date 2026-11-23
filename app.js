@@ -131,10 +131,16 @@
 
     const landedTaxed = landed + duty + pal + cess + xid + clearing + ssclLand;
 
-    const gsAmount = r.gsMarginMode === 'fixed'
-      ? num(r.gsMarginFixed)
-      : landedTaxed * (num(r.gsMarginPct) / 100);
-    const gsExTax  = landedTaxed + gsAmount;
+    let gsAmount, gsExTax;
+if (r.gsMarginMode === 'fixed') {
+  gsAmount = num(r.gsMarginFixed);
+  gsExTax  = landedTaxed + gsAmount;
+} else {
+  const pct = num(r.gsMarginPct) / 100;
+  // gross-up: Price = Cost / (1 - margin%). Guard against 100%+ margins.
+  gsExTax  = pct >= 1 ? landedTaxed : landedTaxed / (1 - pct);
+  gsAmount = gsExTax - landedTaxed;
+}
 
     const nbtRs   = gsExTax * (num(r.nbtPct) / 100);
     const vatGsRs = (gsExTax + nbtRs) * (num(r.vatGsPct) / 100);
